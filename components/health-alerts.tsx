@@ -105,7 +105,7 @@ export function HealthAlerts({ currentAqi = 85 }: HealthAlertsProps) {
         level: "good",
         title: "Good Air Quality",
         description: "Air quality is satisfactory. Enjoy outdoor activities!",
-        color: "text-green-700",
+        color: "text-green-900",
         bgColor: "bg-green-50",
         recommendations: [
           "Perfect conditions for outdoor exercise",
@@ -118,7 +118,7 @@ export function HealthAlerts({ currentAqi = 85 }: HealthAlertsProps) {
         level: "moderate",
         title: "Moderate Air Quality",
         description: "Air quality is acceptable for most people.",
-        color: "text-yellow-700",
+        color: "text-yellow-900",
         bgColor: "bg-yellow-50",
         recommendations: [
           "Sensitive individuals should consider reducing prolonged outdoor exertion",
@@ -131,7 +131,7 @@ export function HealthAlerts({ currentAqi = 85 }: HealthAlertsProps) {
         level: "unhealthy-sensitive",
         title: "Unhealthy for Sensitive Groups",
         description: "Sensitive groups should limit outdoor activities.",
-        color: "text-orange-700",
+        color: "text-orange-900",
         bgColor: "bg-orange-50",
         recommendations: [
           "People with heart or lung disease should reduce outdoor exertion",
@@ -144,7 +144,7 @@ export function HealthAlerts({ currentAqi = 85 }: HealthAlertsProps) {
         level: "unhealthy",
         title: "Unhealthy Air Quality",
         description: "Everyone should limit outdoor activities.",
-        color: "text-red-700",
+        color: "text-red-900",
         bgColor: "bg-red-50",
         recommendations: [
           "Avoid outdoor activities, especially exercise",
