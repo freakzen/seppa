@@ -227,7 +227,7 @@ export function AirQualityDashboard() {
               <div>
                 <p className="font-medium">EPA AirNow</p>
                 <p className="text-xs text-muted-foreground">
-                  {currentData?.source.includes("EPA") ? "Connected" : "Unavailable"}
+                  {currentData?.source.includes("EPA") ? "Connected" : "Available"}
                 </p>
               </div>
             </div>

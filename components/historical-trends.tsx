@@ -80,10 +80,10 @@ export function HistoricalTrends() {
             <Line
               type="monotone"
               dataKey="no2"
-              stroke="#dc2626"
+              stroke="#126de4ff"
               strokeWidth={2}
               name="NO₂ (ppb)"
-              dot={{ fill: "#dc2626", strokeWidth: 2, r: 4 }}
+              dot={{ fill: "#11e3c0ff", strokeWidth: 2, r: 4 }}
             />
           </LineChart>
         </ResponsiveContainer>

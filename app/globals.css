@@ -1,5 +1,10 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import 'leaflet/dist/leaflet.css';
+.aqi-marker {
+  background: transparent !important;
+  border: none !important;
+}
 
 @custom-variant dark (&:is(.dark *));
 

@@ -1,5 +1,5 @@
 {
-  "name": "my-v0-project",
+  "name": "my-tempo-project",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -48,6 +48,7 @@
     "embla-carousel-react": "8.5.1",
     "geist": "latest",
     "input-otp": "1.4.1",
+    "leaflet": "^1.9.4",
     "lucide-react": "^0.454.0",
     "next": "14.2.16",
     "next-themes": "latest",
@@ -69,6 +70,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.9",
+    "@types/leaflet": "^1.9.20",
     "@types/node": "^22",
     "@types/react": "^18",
     "@types/react-dom": "^18",

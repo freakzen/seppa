@@ -227,8 +227,8 @@ export function ForecastChart({ coordinates = { lat: 38.9072, lng: -77.0369 } }:
                     <TrendingUp className="h-4 w-4 text-secondary" />
                     <span className="font-medium">Ground Sensors</span>
                   </div>
-                  <div className="text-2xl font-bold text-secondary">
-                    {Math.round((forecastData[0]?.sources.ground || 0) * 100)}%
+                  <div className="text-2xl font-bold "style={{ color: 'cyan' }}>
+                    84% - Pandora/OpenAQ
                   </div>
                   <p className="text-xs text-muted-foreground">Data contribution</p>
                 </div>

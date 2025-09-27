@@ -77,7 +77,7 @@ export async function GET(request: Request) {
         // Try both satellite data endpoints
         let tempoData = null
         try {
-          tempoData = await fetchTempoSatelliteData(latitude, longitude, date)
+          tempoData = await fetchTempoSatelliteData(latitude, longitude, date ?? undefined)
         } catch (error) {
           console.log("[v0] Satellite endpoint failed, trying tropospheric endpoint...")
           tempoData = await fetchTempoTroposphericData(latitude, longitude)
