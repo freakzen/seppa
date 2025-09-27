@@ -11,3 +11,9 @@ API's and Refrences:
 
 
 Data is validated through ground sensors such as Pandora/OpenAQ for accurate results.
+
+To build and run this project in your vs code follow these steps:
+1. Go to vs code terminal 
+2. Install all the dependencies using "npm install"(dowmloads all packages from the .json file).
+3. To Build and Run use command "npm run dev".
+4. Go to your specified local port to view the changes.
