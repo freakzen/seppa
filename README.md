@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # NASA TEMPO Air Quality Forecast App
 
 *Real-time air quality monitoring powered by NASA TEMPO satellite data*
@@ -117,3 +118,7 @@ Your project is live at:
 ## Contributing
 
 This project uses NASA's TEMPO mission data to help improve public health decisions through better air quality monitoring and forecasting.
+=======
+# seppa
+A github repo-for a web application which is inspired by nasa's tempo data to give users a friendly understanding about the aqi and weather info around them.
+>>>>>>> 13f65c12c4f6aa3cbacbae09d750b3c55e7f077c
