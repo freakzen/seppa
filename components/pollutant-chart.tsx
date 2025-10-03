@@ -17,43 +17,80 @@ interface PollutantChartProps {
 export function PollutantChart({ data }: PollutantChartProps) {
   if (!data) return null
 
+  // EPA National Ambient Air Quality Standards (NAAQS) limits
+  const epaStandards = {
+    pm25: 35,   // 24-hour standard μg/m³
+    pm10: 150,  // 24-hour standard μg/m³
+    no2: 100,   // 1-hour standard ppb
+    o3: 70,     // 8-hour standard ppb
+    co: 9,      // 8-hour standard ppm (converted from 9 ppm)
+  }
+
   const chartData = [
     { 
-        name: "PM2.5", 
-        value: 5 + Math.random() * 25, // Washington PM2.5 typically 5-30 μg/m³
-        unit: "μg/m³", 
-        limit: 35, 
-        color: "#059669" 
+      name: "PM2.5", 
+      value: data.pm25, // Use actual PM2.5 data from dashboard
+      unit: "μg/m³", 
+      limit: epaStandards.pm25, 
+      color: data.pm25 > epaStandards.pm25 ? "#dc2626" : "#059669" // Red if exceeds limit
     },
     { 
-        name: "PM10", 
-        value: 10 + Math.random() * 40, // Washington PM10 typically 10-50 μg/m³
-        unit: "μg/m³", 
-        limit: 150, 
-        color: "#10b981" 
+      name: "PM10", 
+      value: data.pm10, // Use actual PM10 data from dashboard
+      unit: "μg/m³", 
+      limit: epaStandards.pm10, 
+      color: data.pm10 > epaStandards.pm10 ? "#dc2626" : "#10b981"
     },
     { 
-        name: "NO₂", 
-        value: 5 + Math.random() * 25, // Washington NO₂ typically 5-30 ppb
-        unit: "ppb", 
-        limit: 100, 
-        color: "#475569" 
+      name: "NO₂", 
+      value: data.no2, // Use actual NO2 data from dashboard
+      unit: "ppb", 
+      limit: epaStandards.no2, 
+      color: data.no2 > epaStandards.no2 ? "#dc2626" : "#475569"
     },
     { 
-        name: "O₃", 
-        value: 15 + Math.random() * 35, // Washington O₃ typically 15-50 ppb
-        unit: "ppb", 
-        limit: 70, 
-        color: "#dc2626" 
+      name: "O₃", 
+      value: data.o3, // Use actual O3 data from dashboard
+      unit: "ppb", 
+      limit: epaStandards.o3, 
+      color: data.o3 > epaStandards.o3 ? "#dc2626" : "#dc2626" // Ozone is typically orange/red
     },
     { 
-        name: "CO", 
-        value: 0.1 + Math.random() * 1.5, // Washington CO typically 0.1-1.6 ppm
-        unit: "ppm×10", 
-        limit: 90, 
-        color: "#f59e0b" 
+      name: "CO", 
+      value: data.co, // Use actual CO data from dashboard
+      unit: "ppm", 
+      limit: epaStandards.co, 
+      color: data.co > epaStandards.co ? "#dc2626" : "#f59e0b"
     },
-];
+  ]
+
+  // Custom tooltip component
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      const data = payload[0].payload
+      const isExceeding = data.value > data.limit
+      
+      return (
+        <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-sm">
+          <p className="font-semibold">{label}</p>
+          <p className="text-sm">
+            Current: <span className={isExceeding ? "text-red-600 font-semibold" : "text-green-600"}>
+              {data.value.toFixed(1)} {data.unit}
+            </span>
+          </p>
+          <p className="text-sm text-gray-600">
+            EPA Limit: {data.limit} {data.unit}
+          </p>
+          {isExceeding && (
+            <p className="text-xs text-red-600 font-semibold mt-1">
+              ⚠️ Exceeds EPA standard
+            </p>
+          )}
+        </div>
+      )
+    }
+    return null
+  }
 
   return (
     <Card>
@@ -62,7 +99,9 @@ export function PollutantChart({ data }: PollutantChartProps) {
           <Activity className="h-5 w-5" />
           Pollutant Breakdown
         </CardTitle>
-        <CardDescription>Current levels compared to EPA standards</CardDescription>
+        <CardDescription>
+          Current levels compared to EPA National Ambient Air Quality Standards
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>
@@ -70,13 +109,7 @@ export function PollutantChart({ data }: PollutantChartProps) {
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="name" />
             <YAxis />
-            <Tooltip
-              formatter={(value: number, name: string, props: any) => [
-                `${value.toFixed(1)} ${props.payload.unit}`,
-                name,
-              ]}
-              labelFormatter={(label) => `Pollutant: ${label}`}
-            />
+            <Tooltip content={<CustomTooltip />} />
             <Bar dataKey="value" radius={[4, 4, 0, 0]}>
               {chartData.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={entry.color} />
@@ -84,6 +117,18 @@ export function PollutantChart({ data }: PollutantChartProps) {
             </Bar>
           </BarChart>
         </ResponsiveContainer>
+        
+        {/* Legend */}
+        <div className="flex flex-wrap gap-4 mt-4 text-xs text-gray-600">
+          <div className="flex items-center gap-1">
+            <div className="w-3 h-3 bg-green-600 rounded"></div>
+            <span>Within EPA limits</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <div className="w-3 h-3 bg-red-600 rounded"></div>
+            <span>Exceeds EPA limits</span>
+          </div>
+        </div>
       </CardContent>
     </Card>
   )

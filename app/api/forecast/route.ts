@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { fetchWeatherData } from "@/lib/api-client"
-import { validateApiKeys } from "@/lib/api-config"
+import { validateApiKeys } from "@/lib/API-CONFIG"
 
 interface ForecastData {
   timestamp: string
@@ -158,7 +158,7 @@ export async function GET(request: Request) {
 
   const hours = timeframe === "6h" ? 6 : timeframe === "24h" ? 24 : 48
 
-  console.log("[v0] Generating forecast for:", { latitude, longitude, timeframe })
+  console.log("[strawhats] Generating forecast for:", { latitude, longitude, timeframe })
 
   try {
     let realWeatherData = null
@@ -167,18 +167,18 @@ export async function GET(request: Request) {
 
     if (apiAvailability.openweather) {
       try {
-        console.log("[v0] Fetching real weather data for forecast...")
+        console.log("[strawhats] Fetching real weather data for forecast...")
         realWeatherData = await fetchWeatherData(latitude, longitude)
-        console.log("[v0] Real weather data obtained:", {
+        console.log("[strawhats] Real weather data obtained:", {
           temp: realWeatherData.main.temp,
           humidity: realWeatherData.main.humidity,
           wind: realWeatherData.wind.speed,
         })
       } catch (weatherError) {
-        console.error("[v0] Weather API failed, using simulated weather:", weatherError)
+        console.error("[strawhats] Weather API failed, using simulated weather:", weatherError)
       }
     } else {
-      console.log("[v0] OpenWeather API key not available, using simulated weather data")
+      console.log("[strawhats] OpenWeather API key not available, using simulated weather data")
     }
 
     // Generate forecast with real or simulated weather data
@@ -202,7 +202,7 @@ export async function GET(request: Request) {
       },
     })
   } catch (error) {
-    console.error("[v0] Forecast generation error:", error)
+    console.error("[strawhats] Forecast generation error:", error)
     return NextResponse.json({ error: "Failed to generate forecast" }, { status: 500 })
   }
 }

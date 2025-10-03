@@ -1,4 +1,4 @@
-import { API_CONFIG } from "./api-config"
+import { API_CONFIG } from "./API-CONFIG"
 
 export class ApiError extends Error {
   constructor(

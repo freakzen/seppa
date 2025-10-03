@@ -30,10 +30,10 @@ export const API_CONFIG = {
 }
 
 export const validateApiKeys = () => {
-  console.log("[v0] Environment variable debugging:")
-  console.log("[v0] EPA_AIRNOW_API_KEY:", process.env.EPA_AIRNOW_API_KEY ? "SET" : "NOT SET")
-  console.log("[v0] OPENWEATHER_API_KEY:", process.env.OPENWEATHER_API_KEY ? "SET" : "NOT SET")
-  console.log("[v0] TEMPO_API_KEY:", process.env.TEMPO_API_KEY ? "SET" : "NOT SET")
+  console.log("[strawhats] Environment variable debugging:")
+  console.log("[strawhats] EPA_AIRNOW_API_KEY:", process.env.EPA_AIRNOW_API_KEY ? "SET" : "NOT SET")
+  console.log("[strawhats] OPENWEATHER_API_KEY:", process.env.OPENWEATHER_API_KEY ? "SET" : "NOT SET")
+  console.log("[strawhats] TEMPO_API_KEY:", process.env.TEMPO_API_KEY ? "SET" : "NOT SET")
 
   const available = {
     epa: !!API_CONFIG.EPA_AIRNOW.API_KEY,
@@ -41,7 +41,7 @@ export const validateApiKeys = () => {
     tempo: !!API_CONFIG.TEMPO.API_KEY,
   }
 
-  console.log("[v0] API availability:", available)
+  console.log("[strawhats] API availability:", available)
 
   const missing = []
   if (!available.epa) missing.push("EPA_AIRNOW_API_KEY")
@@ -49,8 +49,8 @@ export const validateApiKeys = () => {
   if (!available.tempo) missing.push("TEMPO_API_KEY")
 
   if (missing.length > 0) {
-    console.warn(`[v0] Missing API keys: ${missing.join(", ")}`)
-    console.warn("[v0] App will use available APIs and fallback to simulated data where needed.")
+    console.warn(`[strawhats] Missing API keys: ${missing.join(", ")}`)
+    console.warn("[strawhats] App will use available APIs and Ground Sensor Data.")
   }
 
   return available

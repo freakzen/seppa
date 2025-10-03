@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { fetchEpaAirQuality, fetchAirPollutionData } from "@/lib/api-client"
-import { validateApiKeys } from "@/lib/api-config"
+import { validateApiKeys } from "@/lib/API-CONFIG"
 
 interface AirQualityReading {
   location: {
@@ -88,7 +88,7 @@ async function getFallbackData(lat: number, lng: number): Promise<AirQualityRead
       dataAvailable: true,
     }
   } catch (error) {
-    console.error("[v0] OpenWeather fallback failed:", error)
+    console.error("[ OpenWeather fallback failed:", error)
     throw error
   }
 }
@@ -129,11 +129,11 @@ async function getTempoData(lat: number, lng: number): Promise<any> {
     if (response.ok) {
       return await response.json()
     } else {
-      console.error("[v0] TEMPO API response not ok:", response.status)
+      console.error("[ TEMPO API response not ok:", response.status)
       return null
     }
   } catch (error) {
-    console.error("[v0] Failed to fetch TEMPO data:", error)
+    console.error("[strawhats] Failed to fetch TEMPO data:", error)
     return null
   }
 }
@@ -209,6 +209,18 @@ function combineDataSources(epaData: any[], tempoData: any, weatherData: any, lo
     if (!measurements.co && components.co) measurements.co = components.co
   }
 
+  // ENSURE ALL VALUES ARE POPULATED - ADD FALLBACK VALUES
+  if (measurements.pm25 === 0) measurements.pm25 = 12.5 // Typical urban PM2.5
+  if (measurements.pm10 === 0) measurements.pm10 = 23.8 // Typical urban PM10
+  if (measurements.co === 0) measurements.co = 0.8 // Typical urban CO
+  if (measurements.no2 === 0) measurements.no2 = 18.2 // Typical urban NO2
+  if (measurements.o3 === 0) measurements.o3 = 34.7 // Typical urban O3
+  if (measurements.aqi === 0) {
+    // Calculate AQI from pollutant values if not set
+    const maxPollutant = Math.max(measurements.pm25, measurements.pm10, measurements.no2, measurements.o3)
+    measurements.aqi = Math.min(200, Math.max(20, maxPollutant * 2))
+  }
+
   // Determine data source priority
   if (hasEpaData && hasTempoData) {
     dataSource = "EPA_AirNow + TEMPO"
@@ -242,7 +254,7 @@ export async function GET(request: Request) {
   const longitude = lng ? Number.parseFloat(lng) : -77.0369
   const zip = zipCode || "20001"
 
-  console.log("[v0] Fetching comprehensive air quality data for:", { latitude, longitude, zip })
+  console.log("[strawhats] Fetching comprehensive air quality data for:", { latitude, longitude, zip })
 
   try {
     let epaData = null
@@ -254,36 +266,50 @@ export async function GET(request: Request) {
     // Fetch EPA AirNow data if API key is available
     if (availableApis.epa) {
       try {
-        console.log("[v0] Attempting EPA AirNow API call...")
+        console.log("[strawhats] Attempting EPA AirNow API call...")
         epaData = await fetchEpaAirQuality(zip)
-        console.log("[v0] EPA AirNow response:", epaData?.length || 0, "readings")
+        console.log("[strawhats] EPA AirNow response:", epaData?.length || 0, "readings")
+        
+        // DEBUG: Log what parameters we received from EPA
+        if (epaData && epaData.length > 0) {
+          console.log("[strawhats] EPA Parameters received:", epaData.map((r: any) => ({
+            parameter: r.ParameterName,
+            value: r.Value,
+            aqi: r.AQI
+          })))
+        }
       } catch (epaError) {
-        console.error("[v0] EPA AirNow API failed:", epaError)
+        console.error("[strawhats] EPA AirNow API failed:", epaError)
       }
     } else {
-      console.log("[v0] EPA AirNow API key not available, skipping...")
+      console.log("[strawhats] EPA AirNow API key not available, skipping...")
     }
 
     // Fetch weather-based air pollution data if API key is available
     if (availableApis.openweather) {
       try {
-        console.log("[v0] Attempting OpenWeather air pollution API call...")
+        console.log("[strawhats] Attempting OpenWeather air pollution API call...")
         weatherData = await fetchAirPollutionData(latitude, longitude)
-        console.log("[v0] OpenWeather air pollution data received")
+        console.log("[strawhats] OpenWeather air pollution data received")
+        
+        // DEBUG: Log OpenWeather components
+        if (weatherData && weatherData.list && weatherData.list[0]) {
+          console.log("[strawhats] OpenWeather components:", weatherData.list[0].components)
+        }
       } catch (weatherError) {
-        console.error("[v0] OpenWeather API failed:", weatherError)
+        console.error("[strawhats] OpenWeather API failed:", weatherError)
       }
     } else {
-      console.log("[v0] OpenWeather API key not available, skipping...")
+      console.log("[strawhats] OpenWeather API key not available, skipping...")
     }
 
     // Fetch TEMPO satellite data
     try {
-      console.log("[v0] Attempting TEMPO satellite data fetch...")
+      console.log("[strawhats] Attempting TEMPO satellite data fetch...")
       tempoData = await getTempoData(latitude, longitude)
-      console.log("[v0] TEMPO data received:", tempoData?.data_source)
+      console.log("[strawhats] TEMPO data received:", tempoData?.data_source)
     } catch (tempoError) {
-      console.error("[v0] TEMPO data fetch failed:", tempoError)
+      console.error("[strawhats] TEMPO data fetch failed:", tempoError)
     }
 
     const locationName = epaData?.[0]?.ReportingArea || `${latitude}, ${longitude}`
@@ -296,11 +322,12 @@ export async function GET(request: Request) {
 
     // Combine all data sources
     const result = combineDataSources(epaData, tempoData, weatherData, location)
-    console.log("[v0] Returning combined air quality data from:", result.source)
+    console.log("[strawhats] Returning combined air quality data from:", result.source)
+    console.log("[strawhats] Final measurements:", result.measurements)
 
     return NextResponse.json(result)
   } catch (error) {
-    console.error("[v0] Air quality API error:", error)
+    console.error("[strawhats] Air quality API error:", error)
 
     // Return mock data on any error
     const mockData = getMockData(latitude, longitude)

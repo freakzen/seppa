@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { fetchTempoSatelliteData, fetchTempoTroposphericData, generateSimulatedTempoData } from "@/lib/api-client"
-import { validateApiKeys } from "@/lib/api-config"
+import { validateApiKeys } from "@/lib/API-CONFIG"
 
 interface TempoSatelliteData {
   satellite: string
@@ -65,38 +65,38 @@ export async function GET(request: Request) {
   const latitude = lat ? Number.parseFloat(lat) : 38.9072
   const longitude = lng ? Number.parseFloat(lng) : -77.0369
 
-  console.log("[v0] Fetching TEMPO satellite data for:", { latitude, longitude, date })
+  console.log("[strawhats] Fetching TEMPO satellite data for:", { latitude, longitude, date })
 
   try {
     const availableApis = validateApiKeys()
 
     if (availableApis.tempo) {
       try {
-        console.log("[v0] Attempting NASA TEMPO API call...")
+        console.log("[strawhats] Attempting NASA TEMPO API call...")
 
         // Try both satellite data endpoints
         let tempoData = null
         try {
           tempoData = await fetchTempoSatelliteData(latitude, longitude, date ?? undefined)
         } catch (error) {
-          console.log("[v0] Satellite endpoint failed, trying tropospheric endpoint...")
+          console.log("[strawhats] Satellite endpoint failed, trying tropospheric endpoint...")
           tempoData = await fetchTempoTroposphericData(latitude, longitude)
         }
 
         if (tempoData) {
-          console.log("[v0] NASA TEMPO data received:", tempoData)
+          console.log("[strawhats] NASA TEMPO data received:", tempoData)
           const transformedData = transformTempoData(tempoData, latitude, longitude)
           return NextResponse.json(transformedData)
         }
       } catch (tempoError) {
-        console.error("[v0] NASA TEMPO API failed:", tempoError)
+        console.error("[strawhats] NASA TEMPO API failed:", tempoError)
       }
     } else {
-      console.log("[v0] NASA TEMPO API key not available, using simulated data")
+      console.log("[strawhats] NASA TEMPO API key not available, using simulated data")
     }
 
     // Fallback to simulated TEMPO data
-    console.log("[v0] Using simulated TEMPO data")
+    console.log("[strawhats] Using simulated TEMPO data")
     const simulatedData = generateSimulatedTempoData(latitude, longitude)
     const result: TempoSatelliteData = {
       ...simulatedData,
@@ -105,7 +105,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json(result)
   } catch (error) {
-    console.error("[v0] TEMPO API error:", error)
+    console.error("[strawhats] TEMPO API error:", error)
 
     // Return simulated data on error
     const fallbackData = generateSimulatedTempoData(latitude, longitude)

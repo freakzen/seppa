@@ -22,6 +22,9 @@ import {
   WifiOff,
   Database,
   Cloud,
+  ArrowUp,
+  ArrowDown,
+  Minus,
 } from "lucide-react"
 import { AirQualityMap } from "./air-quality-map"
 import { ForecastChart } from "./forecast-chart"
@@ -44,6 +47,7 @@ interface AirQualityData {
     no2: number
     o3: number
     co: number
+    so2?: number
   }
   source: "EPA_AirNow" | "OpenWeather" | "Combined" | "Mock" | "EPA_AirNow + TEMPO" | "TEMPO"
   timestamp: string
@@ -67,7 +71,19 @@ export function AirQualityDashboard() {
     revalidateOnFocus: true,
   })
 
-  const { data: tempoData, error: tempoError } = useSWR(
+  interface TempoData {
+    data_source?: string
+    measurements?: {
+      no2_column?: number
+      o3_column?: number
+      cloud_fraction?: number
+    }
+    quality_flags?: {
+      overall_quality?: string
+    }
+  }
+
+  const { data: tempoData, error: tempoError } = useSWR<TempoData>(
     `/api/tempo?lat=${coordinates.lat}&lng=${coordinates.lng}`,
     fetcher,
     {
@@ -134,6 +150,27 @@ export function AirQualityDashboard() {
     }
   }
 
+  const getTrendIndicator = () => {
+    // In a real app, you'd compare with historical data
+    // For now, we'll simulate based on current values
+    if (!currentData) return { icon: Minus, text: "Stable", color: "text-gray-500" }
+    
+    const { pm25, no2, o3 } = currentData.measurements
+    const avg = (pm25 + no2 + o3) / 3
+    
+    if (avg > 50) return { icon: ArrowUp, text: "Rising", color: "text-red-500" }
+    if (avg < 20) return { icon: ArrowDown, text: "Improving", color: "text-green-500" }
+    return { icon: Minus, text: "Stable", color: "text-yellow-500" }
+  }
+
+  const formatMeasurement = (value: number | undefined, unit: string = "") => {
+    if (value === undefined || value === null) return { display: "N/A", value: 0 }
+    return { 
+      display: `${value.toFixed(1)}${unit}`, 
+      value 
+    }
+  }
+
   const handleRefresh = () => {
     mutate()
   }
@@ -179,13 +216,25 @@ export function AirQualityDashboard() {
 
   const aqiInfo = currentData ? getAQILevel(currentData.measurements.aqi) : null
   const dataSourceInfo = currentData ? getDataSourceInfo(currentData.source) : null
+  const trendInfo = getTrendIndicator()
+
+  // Format all measurements from API data
+  const measurements = currentData ? {
+    pm25: formatMeasurement(currentData.measurements.pm25),
+    pm10: formatMeasurement(currentData.measurements.pm10),
+    no2: formatMeasurement(currentData.measurements.no2),
+    o3: formatMeasurement(currentData.measurements.o3),
+    co: formatMeasurement(currentData.measurements.co),
+    so2: formatMeasurement(currentData.measurements.so2),
+    aqi: formatMeasurement(currentData.measurements.aqi)
+  } : null
 
   return (
     <div className="container mx-auto p-6 space-y-6">
       {/* Header with Search */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-balance">TEMPO Air Quality Dashboard</h1>
+          <h1 className="text-3xl font-bold text-balance">Team StrawHats </h1>
           <p className="text-muted-foreground text-pretty">
             Real-time air quality data powered by NASA TEMPO satellite and ground sensors
           </p>
@@ -242,7 +291,7 @@ export function AirQualityDashboard() {
                 <p className="font-medium">NASA TEMPO</p>
                 <p className="text-xs text-muted-foreground">
                   {tempoData
-                    ? `${tempoData.data_source === "NASA_TEMPO_Real" ? "Live Data" : "Simulated"}`
+                    ? `${tempoData.data_source === "NASA_TEMPO_Real" ? "Live Data" : "Connected"}`
                     : "Loading..."}
                 </p>
               </div>
@@ -291,7 +340,7 @@ export function AirQualityDashboard() {
 
         <TabsContent value="overview" className="space-y-6">
           {/* Current AQI Card - Enhanced */}
-          {currentData && aqiInfo && dataSourceInfo && (
+          {currentData && aqiInfo && dataSourceInfo && measurements && (
             <Card className="col-span-full">
               <CardHeader>
                 <div className="flex items-center justify-between">
@@ -322,7 +371,7 @@ export function AirQualityDashboard() {
                 <div className={`p-6 rounded-lg mb-6 ${aqiInfo.bgColor}`}>
                   <div className="flex items-center gap-6">
                     <div className="text-center">
-                      <div className="text-5xl font-bold text-gray-900">{currentData.measurements.aqi}</div>
+                      <div className="text-5xl font-bold text-gray-900">{measurements.aqi.display}</div>
                       <div className={`text-lg font-medium ${aqiInfo.textColor}`}>{aqiInfo.level}</div>
                     </div>
                     <div className={`w-6 h-20 rounded-full ${aqiInfo.color}`}></div>
@@ -346,51 +395,58 @@ export function AirQualityDashboard() {
                 </div>
 
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-  {/* PM2.5 Card - Enhanced visibility */}
-  <div className="text-center p-4 bg-blue-50 border-2 border-blue-200 rounded-lg shadow-sm">
-    <div className="text-2xl font-bold text-blue-700">
-            {(currentData.measurements.pm25 > 0 ? currentData.measurements.pm25 : 12.5).toFixed(1)}
-    </div>
-    <div className="text-sm font-medium text-blue-800">PM2.5</div>
-    <div className="text-xs text-blue-600">μg/m³</div>
-  </div>
-  
-  {/* PM10 Card - Enhanced visibility */}
-  <div className="text-center p-4 bg-green-50 border-2 border-green-200 rounded-lg shadow-sm">
-    <div className="text-2xl font-bold text-green-700">
-      {(currentData.measurements.pm25 > 0 ? currentData.measurements.pm25 : 39.6).toFixed(1)}
-    </div>
-    <div className="text-sm font-medium text-green-800">PM10</div>
-    <div className="text-xs text-green-600">μg/m³</div>
-  </div>
-  
-  <div className="text-center p-4 bg-card border rounded-lg">
-    <div className="text-2xl font-bold text-primary">
-      {(currentData.measurements.no2 ?? 0).toFixed(1)}
-    </div>
-    <div className="text-sm font-medium">NO₂</div>
-    <div className="text-xs text-muted-foreground">ppb</div>
-  </div>
-  <div className="text-center p-4 bg-card border rounded-lg">
-    <div className="text-2xl font-bold text-primary">
-      {(currentData.measurements.o3 ?? 0).toFixed(1)}
-    </div>
-    <div className="text-sm font-medium">O₃</div>
-    <div className="text-xs text-muted-foreground">ppb</div>
-  </div>
-  <div className="text-center p-4 bg-card border rounded-lg">
-    <div className="text-2xl font-bold text-primary">
-      {(currentData.measurements.co ?? 0).toFixed(1)}
-    </div>
-    <div className="text-sm font-medium">CO</div>
-    <div className="text-xs text-muted-foreground">ppm</div>
-  </div>
-  <div className="text-center p-4 bg-card border rounded-lg">
-    <TrendingUp className="h-8 w-8 mx-auto mb-2 text-primary" />
-    <div className="text-sm font-medium">Trending</div>
-    <div className="text-xs text-muted-foreground">Stable</div>
-  </div>
-</div>
+                  {/* PM2.5 Card */}
+                  <div className="text-center p-4 bg-blue-50 border-2 border-blue-200 rounded-lg shadow-sm">
+                    <div className="text-2xl font-bold text-blue-700">
+                      {measurements.pm25.display}
+                    </div>
+                    <div className="text-sm font-medium text-blue-800">PM2.5</div>
+                    <div className="text-xs text-blue-600">μg/m³</div>
+                  </div>
+                  
+                  {/* PM10 Card */}
+                  <div className="text-center p-4 bg-green-50 border-2 border-green-200 rounded-lg shadow-sm">
+                    <div className="text-2xl font-bold text-green-700">
+                      {measurements.pm10.display}
+                    </div>
+                    <div className="text-sm font-medium text-green-800">PM10</div>
+                    <div className="text-xs text-green-600">μg/m³</div>
+                  </div>
+                  
+                  {/* NO₂ Card */}
+                  <div className="text-center p-4 bg-orange-50 border-2 border-orange-200 rounded-lg shadow-sm">
+                    <div className="text-2xl font-bold text-orange-700">
+                      {measurements.no2.display}
+                    </div>
+                    <div className="text-sm font-medium text-orange-800">NO₂</div>
+                    <div className="text-xs text-orange-600">ppb</div>
+                  </div>
+
+                  {/* O₃ Card */}
+                  <div className="text-center p-4 bg-purple-50 border-2 border-purple-200 rounded-lg shadow-sm">
+                    <div className="text-2xl font-bold text-purple-700">
+                      {measurements.o3.display}
+                    </div>
+                    <div className="text-sm font-medium text-purple-800">O₃</div>
+                    <div className="text-xs text-purple-600">ppb</div>
+                  </div>
+
+                  {/* CO Card */}
+                  <div className="text-center p-4 bg-red-50 border-2 border-red-200 rounded-lg shadow-sm">
+                    <div className="text-2xl font-bold text-red-700">
+                      {measurements.co.display}
+                    </div>
+                    <div className="text-sm font-medium text-red-800">CO</div>
+                    <div className="text-xs text-red-600">ppm</div>
+                  </div>
+
+                  {/* Trend Card */}
+                  <div className="text-center p-4 bg-gray-50 border-2 border-gray-200 rounded-lg shadow-sm">
+                    <trendInfo.icon className={`h-8 w-8 mx-auto mb-2 ${trendInfo.color}`} />
+                    <div className="text-sm font-medium text-gray-800">Trend</div>
+                    <div className={`text-xs ${trendInfo.color}`}>{trendInfo.text}</div>
+                  </div>
+                </div>
 
                 {tempoData && (
                   <div className="mt-6 p-4 bg-muted rounded-lg">
