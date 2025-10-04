@@ -25,6 +25,8 @@ import {
   ArrowUp,
   ArrowDown,
   Minus,
+  Sun,
+  Moon,
 } from "lucide-react"
 import { AirQualityMap } from "./air-quality-map"
 import { ForecastChart } from "./forecast-chart"
@@ -60,6 +62,7 @@ export function AirQualityDashboard() {
   const [selectedLocation, setSelectedLocation] = useState("Washington, DC")
   const [searchQuery, setSearchQuery] = useState("")
   const [coordinates, setCoordinates] = useState({ lat: 38.9072, lng: -77.0369 })
+  const [isDarkMode, setIsDarkMode] = useState(false)
 
   const {
     data: currentData,
@@ -186,6 +189,12 @@ export function AirQualityDashboard() {
     }
   }
 
+  const toggleTheme = () => {
+    setIsDarkMode(!isDarkMode)
+    // Optional: Add to localStorage for persistence
+    // localStorage.setItem('theme', !isDarkMode ? 'dark' : 'light')
+  }
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -230,416 +239,301 @@ export function AirQualityDashboard() {
   } : null
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <style jsx global>{`
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
+    <div className={isDarkMode ? "dark bg-gray-900 min-h-screen" : "min-h-screen"}>
+      <div className="container mx-auto p-6 space-y-6">
+        {/* Header with Search */}
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-balance dark:text-white">Team StrawHats </h1>
+            <p className="text-muted-foreground text-pretty dark:text-gray-300">
+              Real-time air quality data powered by NASA TEMPO satellite and ground sensors
+            </p>
+          </div>
 
-        @keyframes slideInRight {
-          from {
-            opacity: 0;
-            transform: translateX(30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
-        }
+          <div className="flex items-center gap-4">
+            <form onSubmit={handleLocationSearch} className="flex gap-2">
+              <Input
+                placeholder="Search location..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-48 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+              />
+              <Button type="submit" size="icon" variant="outline" className="dark:bg-gray-800 dark:border-gray-700">
+                <Search className="h-4 w-4" />
+              </Button>
+            </form>
 
-        @keyframes pulse {
-          0%, 100% {
-            opacity: 1;
-          }
-          50% {
-            opacity: 0.7;
-          }
-        }
-
-        @keyframes scaleIn {
-          from {
-            opacity: 0;
-            transform: scale(0.9);
-          }
-          to {
-            opacity: 1;
-            transform: scale(1);
-          }
-        }
-
-        @keyframes shimmer {
-          0% {
-            background-position: -1000px 0;
-          }
-          100% {
-            background-position: 1000px 0;
-          }
-        }
-
-        .animate-fade-in-up {
-          animation: fadeInUp 0.6s ease-out forwards;
-        }
-
-        .animate-slide-in-right {
-          animation: slideInRight 0.5s ease-out forwards;
-        }
-
-        .animate-pulse-slow {
-          animation: pulse 2s ease-in-out infinite;
-        }
-
-        .animate-scale-in {
-          animation: scaleIn 0.4s ease-out forwards;
-        }
-
-        .stagger-1 {
-          animation-delay: 0.1s;
-          opacity: 0;
-        }
-
-        .stagger-2 {
-          animation-delay: 0.2s;
-          opacity: 0;
-        }
-
-        .stagger-3 {
-          animation-delay: 0.3s;
-          opacity: 0;
-        }
-
-        .stagger-4 {
-          animation-delay: 0.4s;
-          opacity: 0;
-        }
-
-        .stagger-5 {
-          animation-delay: 0.5s;
-          opacity: 0;
-        }
-
-        .stagger-6 {
-          animation-delay: 0.6s;
-          opacity: 0;
-        }
-
-        .hover-lift {
-          transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .hover-lift:hover {
-          transform: translateY(-4px);
-          box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-        }
-
-        .shimmer {
-          background: linear-gradient(
-            90deg,
-            transparent,
-            rgba(255, 255, 255, 0.3),
-            transparent
-          );
-          background-size: 1000px 100%;
-          animation: shimmer 2s infinite;
-        }
-      `}</style>
-
-      {/* Header with Search */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 animate-fade-in-up">
-        <div>
-          <h1 className="text-3xl font-bold text-balance">Team StrawHats </h1>
-          <p className="text-muted-foreground text-pretty">
-            Real-time air quality data powered by NASA TEMPO satellite and ground sensors
-          </p>
-        </div>
-
-        <div className="flex items-center gap-4 animate-slide-in-right">
-          <form onSubmit={handleLocationSearch} className="flex gap-2">
-            <Input
-              placeholder="Search location..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-48 transition-all duration-300 focus:w-64"
-            />
-            <Button type="submit" size="icon" variant="outline" className="hover:scale-110 transition-transform duration-200">
-              <Search className="h-4 w-4" />
+            {/* Theme Toggle Button */}
+            <Button 
+              onClick={toggleTheme} 
+              variant="outline" 
+              size="icon"
+              className="flex items-center justify-center dark:bg-gray-800 dark:border-gray-700"
+            >
+              {isDarkMode ? (
+                <Sun className="h-4 w-4 dark:text-yellow-400" />
+              ) : (
+                <Moon className="h-4 w-4" />
+              )}
             </Button>
-          </form>
 
-          <Button onClick={handleRefresh} variant="outline" size="icon" className="hover:rotate-180 transition-transform duration-500">
-            <RefreshCw className="h-4 w-4" />
-          </Button>
+            <Button onClick={handleRefresh} variant="outline" size="icon" className="dark:bg-gray-800 dark:border-gray-700">
+              <RefreshCw className="h-4 w-4" />
+            </Button>
 
-          <div className="flex items-center gap-2">
-            {dataSourceInfo && (
-              <>
-                <dataSourceInfo.icon className={`h-5 w-5 ${dataSourceInfo.color} animate-pulse-slow`} />
-                <span className="text-sm font-medium">{dataSourceInfo.label}</span>
-              </>
-            )}
+            <div className="flex items-center gap-2">
+              {dataSourceInfo && (
+                <>
+                  <dataSourceInfo.icon className={`h-5 w-5 ${dataSourceInfo.color}`} />
+                  <span className="text-sm font-medium dark:text-white">{dataSourceInfo.label}</span>
+                </>
+              )}
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="border-l-4 border-l-blue-500 hover-lift animate-fade-in-up stagger-1">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <Database className="h-5 w-5 text-blue-600 animate-pulse-slow" />
-              <div>
-                <p className="font-medium">EPA AirNow</p>
-                <p className="text-xs text-muted-foreground">
-                  {currentData?.source.includes("EPA") ? "Connected" : "Available"}
-                </p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Card className="border-l-4 border-l-blue-500 dark:bg-gray-800 dark:border-gray-700">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <Database className="h-5 w-5 text-blue-600" />
+                <div>
+                  <p className="font-medium dark:text-white">EPA AirNow</p>
+                  <p className="text-xs text-muted-foreground dark:text-gray-300">
+                    {currentData?.source.includes("EPA") ? "Connected" : "Available"}
+                  </p>
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        <Card className="border-l-4 border-l-purple-500 hover-lift animate-fade-in-up stagger-2">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <Satellite className="h-5 w-5 text-purple-600 animate-pulse-slow" />
-              <div>
-                <p className="font-medium">NASA TEMPO</p>
-                <p className="text-xs text-muted-foreground">
-                  {tempoData
-                    ? `${tempoData.data_source === "NASA_TEMPO_Real" ? "Live Data" : "Connected"}`
-                    : "Loading..."}
-                </p>
+          <Card className="border-l-4 border-l-purple-500 dark:bg-gray-800 dark:border-gray-700">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <Satellite className="h-5 w-5 text-purple-600" />
+                <div>
+                  <p className="font-medium dark:text-white">NASA TEMPO</p>
+                  <p className="text-xs text-muted-foreground dark:text-gray-300">
+                    {tempoData
+                      ? `${tempoData.data_source === "NASA_TEMPO_Real" ? "Live Data" : "Connected"}`
+                      : "Loading..."}
+                  </p>
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        <Card className="border-l-4 border-l-orange-500 hover-lift animate-fade-in-up stagger-3">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <Cloud className="h-5 w-5 text-orange-600 animate-pulse-slow" />
-              <div>
-                <p className="font-medium">Weather Data</p>
-                <p className="text-xs text-muted-foreground">
-                  {currentData?.source.includes("OpenWeather") || currentData?.source.includes("Combined")
-                    ? "Connected"
-                    : "Backup"}
-                </p>
+          <Card className="border-l-4 border-l-orange-500 dark:bg-gray-800 dark:border-gray-700">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <Cloud className="h-5 w-5 text-orange-600" />
+                <div>
+                  <p className="font-medium dark:text-white">Weather Data</p>
+                  <p className="text-xs text-muted-foreground dark:text-gray-300">
+                    {currentData?.source.includes("OpenWeather") || currentData?.source.includes("Combined")
+                      ? "Connected"
+                      : "Backup"}
+                  </p>
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+            </CardContent>
+          </Card>
+        </div>
 
-      {/* Current Conditions Alert */}
-      {currentData && aqiInfo && currentData.measurements.aqi > 100 && (
-        <Alert className="border-destructive animate-scale-in">
-          <AlertTriangle className="h-4 w-4 animate-pulse" />
-          <AlertTitle>Air Quality Alert</AlertTitle>
-          <AlertDescription>
-            Current AQI is {currentData.measurements.aqi} ({aqiInfo.level}). Consider limiting outdoor activities.
-          </AlertDescription>
-        </Alert>
-      )}
+        {/* Current Conditions Alert */}
+        {currentData && aqiInfo && currentData.measurements.aqi > 100 && (
+          <Alert className="border-destructive dark:bg-red-900/20 dark:border-red-800">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertTitle className="dark:text-white">Air Quality Alert</AlertTitle>
+            <AlertDescription className="dark:text-gray-300">
+              Current AQI is {currentData.measurements.aqi} ({aqiInfo.level}). Consider limiting outdoor activities.
+            </AlertDescription>
+          </Alert>
+        )}
 
-      {/* Main Dashboard */}
-      <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-6 animate-fade-in-up stagger-2">
-          <TabsTrigger value="overview" className="transition-all duration-200 hover:scale-105">Overview</TabsTrigger>
-          <TabsTrigger value="map" className="transition-all duration-200 hover:scale-105">Live Map</TabsTrigger>
-          <TabsTrigger value="trends" className="transition-all duration-200 hover:scale-105">Trends</TabsTrigger>
-          <TabsTrigger value="forecast" className="transition-all duration-200 hover:scale-105">Forecast</TabsTrigger>
-          <TabsTrigger value="alerts" className="transition-all duration-200 hover:scale-105">Health Alerts</TabsTrigger>
-          <TabsTrigger value="notifications" className="transition-all duration-200 hover:scale-105">Notifications</TabsTrigger>
-        </TabsList>
+        {/* Main Dashboard */}
+        <Tabs defaultValue="overview" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-6 dark:bg-gray-800">
+            <TabsTrigger value="overview" className="dark:data-[state=active]:bg-gray-700 dark:text-white">Overview</TabsTrigger>
+            <TabsTrigger value="map" className="dark:data-[state=active]:bg-gray-700 dark:text-white">Live Map</TabsTrigger>
+            <TabsTrigger value="trends" className="dark:data-[state=active]:bg-gray-700 dark:text-white">Trends</TabsTrigger>
+            <TabsTrigger value="forecast" className="dark:data-[state=active]:bg-gray-700 dark:text-white">Forecast</TabsTrigger>
+            <TabsTrigger value="alerts" className="dark:data-[state=active]:bg-gray-700 dark:text-white">Health Alerts</TabsTrigger>
+            <TabsTrigger value="notifications" className="dark:data-[state=active]:bg-gray-700 dark:text-white">Notifications</TabsTrigger>
+          </TabsList>
 
-        <TabsContent value="overview" className="space-y-6">
-          {/* Current AQI Card - Enhanced */}
-          {currentData && aqiInfo && dataSourceInfo && measurements && (
-            <Card className="col-span-full animate-fade-in-up stagger-3 hover-lift">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="flex items-center gap-2">
-                      <MapPin className="h-5 w-5 animate-pulse-slow" />
-                      {currentData.location.name}
-                    </CardTitle>
-                    <CardDescription className="flex items-center gap-2">
-                      <Clock className="h-4 w-4" />
-                      Last updated: {new Date(currentData.timestamp).toLocaleTimeString()}
-                    </CardDescription>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="secondary" className="text-xs flex items-center gap-1 animate-slide-in-right">
-                      <dataSourceInfo.icon className="h-3 w-3" />
-                      {dataSourceInfo.label}
-                    </Badge>
-                    {!currentData.dataAvailable && (
-                      <Badge variant="outline" className="text-xs animate-slide-in-right">
-                        Demo Data
+          <TabsContent value="overview" className="space-y-6">
+            {/* Current AQI Card - Enhanced */}
+            {currentData && aqiInfo && dataSourceInfo && measurements && (
+              <Card className="col-span-full dark:bg-gray-800 dark:border-gray-700">
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="flex items-center gap-2 dark:text-white">
+                        <MapPin className="h-5 w-5" />
+                        {currentData.location.name}
+                      </CardTitle>
+                      <CardDescription className="flex items-center gap-2 dark:text-gray-300">
+                        <Clock className="h-4 w-4" />
+                        Last updated: {new Date(currentData.timestamp).toLocaleTimeString()}
+                      </CardDescription>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="secondary" className="text-xs flex items-center gap-1 dark:bg-gray-700 dark:text-white">
+                        <dataSourceInfo.icon className="h-3 w-3" />
+                        {dataSourceInfo.label}
                       </Badge>
-                    )}
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className={`p-6 rounded-lg mb-6 ${aqiInfo.bgColor} animate-scale-in transition-all duration-300`}>
-                  <div className="flex items-center gap-6">
-                    <div className="text-center">
-                      <div className="text-5xl font-bold text-gray-900 animate-scale-in">{measurements.aqi.display}</div>
-                      <div className={`text-lg font-medium ${aqiInfo.textColor}`}>{aqiInfo.level}</div>
-                    </div>
-                    <div className={`w-6 h-20 rounded-full ${aqiInfo.color} animate-pulse-slow`}></div>
-                    <div className="flex-1">
-                      <h3 className="font-semibold mb-2 text-gray-900">Air Quality Index</h3>
-                      <p className="text-sm text-muted-foreground mb-2">
-                        {currentData.measurements.aqi <= 50 &&
-                          "Air quality is satisfactory, and air pollution poses little or no risk."}
-                        {currentData.measurements.aqi > 50 &&
-                          currentData.measurements.aqi <= 100 &&
-                          "Air quality is acceptable for most people. Sensitive individuals may experience minor issues."}
-                        {currentData.measurements.aqi > 100 &&
-                          currentData.measurements.aqi <= 150 &&
-                          "Members of sensitive groups may experience health effects. The general public is less likely to be affected."}
-                        {currentData.measurements.aqi > 150 &&
-                          "Everyone may begin to experience health effects. Members of sensitive groups may experience more serious effects."}
-                      </p>
-                      <p className="text-xs text-muted-foreground">Data source: {dataSourceInfo.description}</p>
+                      {!currentData.dataAvailable && (
+                        <Badge variant="outline" className="text-xs dark:border-gray-600 dark:text-gray-300">
+                          Demo Data
+                        </Badge>
+                      )}
                     </div>
                   </div>
-                </div>
-
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-                  {/* PM2.5 Card */}
-                  <div className="text-center p-4 bg-blue-50 border-2 border-blue-200 rounded-lg shadow-sm hover-lift animate-fade-in-up stagger-1">
-                    <div className="text-2xl font-bold text-blue-700">
-                      {measurements.pm25.display}
-                    </div>
-                    <div className="text-sm font-medium text-blue-800">PM2.5</div>
-                    <div className="text-xs text-blue-600">μg/m³</div>
-                  </div>
-                  
-                  {/* PM10 Card */}
-                  <div className="text-center p-4 bg-green-50 border-2 border-green-200 rounded-lg shadow-sm hover-lift animate-fade-in-up stagger-2">
-                    <div className="text-2xl font-bold text-green-700">
-                      {measurements.pm10.display}
-                    </div>
-                    <div className="text-sm font-medium text-green-800">PM10</div>
-                    <div className="text-xs text-green-600">μg/m³</div>
-                  </div>
-                  
-                  {/* NO₂ Card */}
-                  <div className="text-center p-4 bg-orange-50 border-2 border-orange-200 rounded-lg shadow-sm hover-lift animate-fade-in-up stagger-3">
-                    <div className="text-2xl font-bold text-orange-700">
-                      {measurements.no2.display}
-                    </div>
-                    <div className="text-sm font-medium text-orange-800">NO₂</div>
-                    <div className="text-xs text-orange-600">ppb</div>
-                  </div>
-
-                  {/* O₃ Card */}
-                  <div className="text-center p-4 bg-purple-50 border-2 border-purple-200 rounded-lg shadow-sm hover-lift animate-fade-in-up stagger-4">
-                    <div className="text-2xl font-bold text-purple-700">
-                      {measurements.o3.display}
-                    </div>
-                    <div className="text-sm font-medium text-purple-800">O₃</div>
-                    <div className="text-xs text-purple-600">ppb</div>
-                  </div>
-
-                  {/* CO Card */}
-                  <div className="text-center p-4 bg-red-50 border-2 border-red-200 rounded-lg shadow-sm hover-lift animate-fade-in-up stagger-5">
-                    <div className="text-2xl font-bold text-red-700">
-                      {measurements.co.display}
-                    </div>
-                    <div className="text-sm font-medium text-red-800">CO</div>
-                    <div className="text-xs text-red-600">ppm</div>
-                  </div>
-
-                  {/* Trend Card */}
-                  <div className="text-center p-4 bg-gray-50 border-2 border-gray-200 rounded-lg shadow-sm hover-lift animate-fade-in-up stagger-6">
-                    <trendInfo.icon className={`h-8 w-8 mx-auto mb-2 ${trendInfo.color} animate-pulse-slow`} />
-                    <div className="text-sm font-medium text-gray-800">Trend</div>
-                    <div className={`text-xs ${trendInfo.color}`}>{trendInfo.text}</div>
-                  </div>
-                </div>
-
-                {tempoData && (
-                  <div className="mt-6 p-4 bg-muted rounded-lg animate-fade-in-up stagger-4 hover-lift">
-                    <h4 className="font-semibold mb-3 flex items-center gap-2">
-                      <Satellite className="h-4 w-4 animate-pulse-slow" />
-                      NASA TEMPO Satellite Data
-                    </h4>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                      <div className="animate-fade-in-up stagger-1">
-                        <span className="text-muted-foreground">NO₂ Column:</span>
-                        <div className="font-medium">
-                          {tempoData.measurements?.no2_column?.toFixed(2) || "N/A"} mol/cm²
-                        </div>
+                </CardHeader>
+                <CardContent>
+                  <div className={`p-6 rounded-lg mb-6 ${aqiInfo.bgColor} dark:bg-opacity-20`}>
+                    <div className="flex items-center gap-6">
+                      <div className="text-center">
+                        <div className="text-5xl font-bold text-gray-900 dark:text-black">{measurements.aqi.display}</div>
+                        <div className={`text-lg font-medium ${aqiInfo.textColor} dark:text-opacity-90`}>{aqiInfo.level}</div>
                       </div>
-                      <div className="animate-fade-in-up stagger-2">
-                        <span className="text-muted-foreground">O₃ Column:</span>
-                        <div className="font-medium">
-                          {tempoData.measurements?.o3_column?.toFixed(2) || "N/A"} mol/cm²
-                        </div>
-                      </div>
-                      <div className="animate-fade-in-up stagger-3">
-                        <span className="text-muted-foreground">Cloud Fraction:</span>
-                        <div className="font-medium">
-                          {((tempoData.measurements?.cloud_fraction || 0) * 100).toFixed(0)}%
-                        </div>
-                      </div>
-                      <div className="animate-fade-in-up stagger-4">
-                        <span className="text-muted-foreground">Data Quality:</span>
-                        <div className="font-medium capitalize">
-                          {tempoData.quality_flags?.overall_quality || "Unknown"}
-                        </div>
+                      <div className={`w-6 h-20 rounded-full ${aqiInfo.color}`}></div>
+                      <div className="flex-1">
+                        <h3 className="font-semibold mb-2 text-gray-900 dark:text-black">Air Quality Index</h3>
+                        <p className="text-sm text-muted-foreground mb-2 dark:text-black">
+                          {currentData.measurements.aqi <= 50 &&
+                            "Air quality is satisfactory, and air pollution poses little or no risk."}
+                          {currentData.measurements.aqi > 50 &&
+                            currentData.measurements.aqi <= 100 &&
+                            "Air quality is acceptable for most people. Sensitive individuals may experience minor issues."}
+                          {currentData.measurements.aqi > 100 &&
+                            currentData.measurements.aqi <= 150 &&
+                            "Members of sensitive groups may experience health effects. The general public is less likely to be affected."}
+                          {currentData.measurements.aqi > 150 &&
+                            "Everyone may begin to experience health effects. Members of sensitive groups may experience more serious effects."}
+                        </p>
+                        <p className="text-xs text-muted-foreground dark:text-black">Data source: {dataSourceInfo.description}</p>
                       </div>
                     </div>
                   </div>
-                )}
-              </CardContent>
-            </Card>
-          )}
 
-          <div className="animate-fade-in-up stagger-5">
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                    {/* PM2.5 Card */}
+                    <div className="text-center p-4 bg-blue-50 border-2 border-blue-200 rounded-lg shadow-sm dark:bg-blue-900/20 dark:border-blue-800">
+                      <div className="text-2xl font-bold text-blue-700 dark:text-blue-300">
+                        {measurements.pm25.display}
+                      </div>
+                      <div className="text-sm font-medium text-blue-800 dark:text-blue-200">PM2.5</div>
+                      <div className="text-xs text-blue-600 dark:text-blue-400">μg/m³</div>
+                    </div>
+                    
+                    {/* PM10 Card */}
+                    <div className="text-center p-4 bg-green-50 border-2 border-green-200 rounded-lg shadow-sm dark:bg-green-900/20 dark:border-green-800">
+                      <div className="text-2xl font-bold text-green-700 dark:text-green-300">
+                        {measurements.pm10.display}
+                      </div>
+                      <div className="text-sm font-medium text-green-800 dark:text-green-200">PM10</div>
+                      <div className="text-xs text-green-600 dark:text-green-400">μg/m³</div>
+                    </div>
+                    
+                    {/* NO₂ Card */}
+                    <div className="text-center p-4 bg-orange-50 border-2 border-orange-200 rounded-lg shadow-sm dark:bg-orange-900/20 dark:border-orange-800">
+                      <div className="text-2xl font-bold text-orange-700 dark:text-orange-300">
+                        {measurements.no2.display}
+                      </div>
+                      <div className="text-sm font-medium text-orange-800 dark:text-orange-200">NO₂</div>
+                      <div className="text-xs text-orange-600 dark:text-orange-400">ppb</div>
+                    </div>
+
+                    {/* O₃ Card */}
+                    <div className="text-center p-4 bg-purple-50 border-2 border-purple-200 rounded-lg shadow-sm dark:bg-purple-900/20 dark:border-purple-800">
+                      <div className="text-2xl font-bold text-purple-700 dark:text-purple-300">
+                        {measurements.o3.display}
+                      </div>
+                      <div className="text-sm font-medium text-purple-800 dark:text-purple-200">O₃</div>
+                      <div className="text-xs text-purple-600 dark:text-purple-400">ppb</div>
+                    </div>
+
+                    {/* CO Card */}
+                    <div className="text-center p-4 bg-red-50 border-2 border-red-200 rounded-lg shadow-sm dark:bg-red-900/20 dark:border-red-800">
+                      <div className="text-2xl font-bold text-red-700 dark:text-red-300">
+                        {measurements.co.display}
+                      </div>
+                      <div className="text-sm font-medium text-red-800 dark:text-red-200">CO</div>
+                      <div className="text-xs text-red-600 dark:text-red-400">ppm</div>
+                    </div>
+
+                    {/* Trend Card */}
+                    <div className="text-center p-4 bg-gray-50 border-2 border-gray-200 rounded-lg shadow-sm dark:bg-gray-700 dark:border-gray-600">
+                      <trendInfo.icon className={`h-8 w-8 mx-auto mb-2 ${trendInfo.color}`} />
+                      <div className="text-sm font-medium text-gray-800 dark:text-white">Trend</div>
+                      <div className={`text-xs ${trendInfo.color}`}>{trendInfo.text}</div>
+                    </div>
+                  </div>
+
+                  {tempoData && (
+                    <div className="mt-6 p-4 bg-muted rounded-lg dark:bg-gray-700">
+                      <h4 className="font-semibold mb-3 flex items-center gap-2 dark:text-white">
+                        <Satellite className="h-4 w-4" />
+                        NASA TEMPO Satellite Data
+                      </h4>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                        <div>
+                          <span className="text-muted-foreground dark:text-gray-300">NO₂ Column:</span>
+                          <div className="font-medium dark:text-white">
+                            {tempoData.measurements?.no2_column?.toFixed(2) || "N/A"} mol/cm²
+                          </div>
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground dark:text-gray-300">O₃ Column:</span>
+                          <div className="font-medium dark:text-white">
+                            {tempoData.measurements?.o3_column?.toFixed(2) || "N/A"} mol/cm²
+                          </div>
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground dark:text-gray-300">Cloud Fraction:</span>
+                          <div className="font-medium dark:text-white">
+                            {((tempoData.measurements?.cloud_fraction || 0) * 100).toFixed(0)}%
+                          </div>
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground dark:text-gray-300">Data Quality:</span>
+                          <div className="font-medium capitalize dark:text-white">
+                            {tempoData.quality_flags?.overall_quality || "Unknown"}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
             <PollutantChart data={currentData ? currentData.measurements : null} />
-          </div>
-        </TabsContent>
+          </TabsContent>
 
-        <TabsContent value="map">
-          <div className="animate-fade-in-up">
+          <TabsContent value="map">
             <AirQualityMap />
-          </div>
-        </TabsContent>
+          </TabsContent>
 
-        <TabsContent value="trends">
-          <div className="animate-fade-in-up">
+          <TabsContent value="trends">
             <HistoricalTrends />
-          </div>
-        </TabsContent>
+          </TabsContent>
 
-        <TabsContent value="forecast">
-          <div className="animate-fade-in-up">
+          <TabsContent value="forecast">
             <ForecastChart coordinates={coordinates} />
-          </div>
-        </TabsContent>
+          </TabsContent>
 
-        <TabsContent value="alerts">
-          <div className="animate-fade-in-up">
+          <TabsContent value="alerts">
             <HealthAlerts currentAqi={currentData?.measurements.aqi} />
-          </div>
-        </TabsContent>
+          </TabsContent>
 
-        <TabsContent value="notifications">
-          <div className="animate-fade-in-up">
+          <TabsContent value="notifications">
             <NotificationCenter />
-          </div>
-        </TabsContent>
-      </Tabs>
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   )
 }

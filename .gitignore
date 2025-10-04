@@ -166,4 +166,9 @@ dist
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# Environment variables
+.env
+.env.local
+.env.production
 >>>>>>> 13f65c12c4f6aa3cbacbae09d750b3c55e7f077c

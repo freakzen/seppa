@@ -50,7 +50,7 @@ export const validateApiKeys = () => {
 
   if (missing.length > 0) {
     console.warn(`[strawhats] Missing API keys: ${missing.join(", ")}`)
-    console.warn("[strawhats] App will use available APIs and Ground Sensor Data.")
+    console.warn("[strawhats] App will use available APIs and fallback to simulated data where needed.")
   }
 
   return available

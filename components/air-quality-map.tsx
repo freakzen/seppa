@@ -3,7 +3,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Satellite, RefreshCw, Eye, Clock } from "lucide-react"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 
 // Types for air quality data
 interface AirQualityData {
@@ -25,6 +25,9 @@ export function AirQualityMap() {
   const [airQualityData, setAirQualityData] = useState<AirQualityData[]>([])
   const [loading, setLoading] = useState(true)
   const [lastUpdated, setLastUpdated] = useState<string>('')
+  const mapRef = useRef<L.Map | null>(null)
+  const mapInitializedRef = useRef(false)
+  const [mapStyle, setMapStyle] = useState<"satellite" | "streets" | "terrain">("satellite")
 
   // Function to get AQI color based on value
   const getAQIColor = (aqi: number): string => {
@@ -184,10 +187,27 @@ export function AirQualityMap() {
     return () => clearInterval(interval)
   }, [])
 
+  const updateMapStyle = (style: "satellite" | "streets" | "terrain") => {
+    setMapStyle(style)
+    // Force re-render of map with new style
+    if (mapRef.current) {
+      mapRef.current.remove()
+      mapRef.current = null
+      mapInitializedRef.current = false
+    }
+  }
+
   useEffect(() => {
     if (airQualityData.length === 0) return
 
     const initMap = async () => {
+      // Clean up existing map
+      if (mapRef.current) {
+        mapRef.current.remove()
+        mapRef.current = null
+        mapInitializedRef.current = false
+      }
+
       const L = await import('leaflet')
       
       // Fix for default markers
@@ -198,48 +218,80 @@ export function AirQualityMap() {
         shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
       })
 
-      const map = L.map('map-container').setView([45.0, -100.0], 4)
-      
-      // Add a more professional looking tile layer
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-        maxZoom: 18,
-      }).addTo(map)
+      // Check if container exists and hasn't been initialized
+      const mapContainer = document.getElementById('map-container')
+      if (!mapContainer || mapInitializedRef.current) {
+        return
+      }
 
-      // Add air quality markers
+      // Create new map instance
+      const map = L.map('map-container').setView([45.0, -100.0], 4)
+      mapRef.current = map
+      mapInitializedRef.current = true
+      
+      // Different tile layers for different styles
+      let tileLayer
+      switch (mapStyle) {
+        case "satellite":
+          // Esri World Imagery - High quality satellite imagery
+          tileLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
+            maxZoom: 18,
+          })
+          break
+        case "terrain":
+          // Esri World Terrain Base with hillshading
+          tileLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Shaded_Relief/MapServer/tile/{z}/{y}/{x}', {
+            attribution: 'Tiles &copy; Esri &mdash; Source: Esri',
+            maxZoom: 13,
+          })
+          break
+        case "streets":
+        default:
+          // OpenStreetMap with more colorful styling
+          tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            maxZoom: 18,
+          })
+      }
+
+      tileLayer.addTo(map)
+
+      // Add air quality markers with enhanced styling for better visibility on satellite
       airQualityData.forEach(station => {
         const aqiColor = getAQIColor(station.aqi)
         
-        // Create custom marker with AQI color - larger and more prominent
+        // Create custom marker with AQI color - larger and more prominent for satellite view
         const customIcon = L.divIcon({
           className: 'aqi-marker',
           html: `
             <div style="
               background-color: ${aqiColor};
-              width: 28px;
-              height: 28px;
+              width: 32px;
+              height: 32px;
               border-radius: 50%;
-              border: 3px solid white;
-              box-shadow: 0 3px 12px rgba(0,0,0,0.4);
+              border: 4px solid white;
+              box-shadow: 0 4px 16px rgba(0,0,0,0.6);
               display: flex;
               align-items: center;
               justify-content: center;
               color: white;
               font-weight: bold;
-              font-size: 11px;
+              font-size: 12px;
               cursor: pointer;
               transition: all 0.2s ease;
+              text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
             ">${station.aqi}</div>
           `,
-          iconSize: [34, 34],
-          iconAnchor: [17, 17]
+          iconSize: [40, 40],
+          iconAnchor: [20, 20]
         })
 
         const popupContent = `
           <div style="min-width: 240px; font-family: system-ui, sans-serif;">
             <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #e2e8f0;">
               <div style="width: 16px; height: 16px; border-radius: 50%; background-color: ${aqiColor};"></div>
-              <h3 style="margin: 0; color: #dbdfe6ff; font-size: 16px; font-weight: 600;">${station.city}, ${station.country}</h3>
+              <h3 style="margin: 0; color: #1a202c; font-size: 16px; font-weight: 600;">${station.city}, ${station.country}</h3>
             </div>
             
             <div style="background: linear-gradient(135deg, ${aqiColor}20, ${aqiColor}40); padding: 12px; border-radius: 8px; margin-bottom: 12px;">
@@ -248,8 +300,8 @@ export function AirQualityMap() {
             </div>
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 13px;">
-              <div style="background: #d7e1ecff; padding: 6px 8px; border-radius: 4px;">
-                <div style="color: #d9dfe7ff; font-size: 11px;">PM2.5</div>
+              <div style="background: #f7fafc; padding: 6px 8px; border-radius: 4px;">
+                <div style="color: #718096; font-size: 11px;">PM2.5</div>
                 <div style="font-weight: 600; color: #2d3748;">${station.pm25.toFixed(1)} µg/m³</div>
               </div>
               <div style="background: #f7fafc; padding: 6px 8px; border-radius: 4px;">
@@ -306,49 +358,93 @@ export function AirQualityMap() {
       )
       map.setMaxBounds(northAmericaBounds)
       map.setMinZoom(3)
-
-      return () => {
-        map.remove()
-      }
     }
 
     initMap()
-  }, [airQualityData])
+
+    // Cleanup function
+    return () => {
+      if (mapRef.current) {
+        mapRef.current.remove()
+        mapRef.current = null
+        mapInitializedRef.current = false
+      }
+    }
+  }, [airQualityData, mapStyle])
 
   return (
     <div className="space-y-6">
       <Card className="border-2 shadow-lg">
         <CardHeader className="bg-gradient-to-r from-blue-50 to-cyan-50 border-b">
-          <div className="flex justify-between items-center">
-            <CardTitle className="flex items-center gap-3 text-2xl font-bold text-gray-800">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <Satellite className="h-6 w-6 text-blue-600" />
-              </div>
-              Live Air Quality Map - North America
-            </CardTitle>
-            <div className="flex items-center gap-4">
-              {lastUpdated && (
-                <div className="flex items-center gap-2 text-sm text-gray-600 bg-white px-3 py-1 rounded-full border">
-                  <Clock className="h-4 w-4" />
-                  Last updated: {lastUpdated}
-                </div>
-              )}
-              <button 
-                onClick={fetchAirQualityData}
-                disabled={loading}
-                className="flex items-center gap-2 px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
-              >
-                <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-                {loading ? 'Refreshing...' : 'Refresh Data'}
-              </button>
-            </div>
-          </div>
-          <CardDescription className="text-base text-gray-600 mt-2">
-            Real-time air quality monitoring across North America with hourly updates
-          </CardDescription>
-        </CardHeader>
+  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div className="flex items-center gap-3">
+      <div className="p-2 bg-blue-100 rounded-lg">
+        <Satellite className="h-6 w-6 text-blue-600" />
+      </div>
+      <div>
+        <CardTitle className="text-2xl font-bold text-gray-800">
+          Live Air Quality Map - North America
+        </CardTitle>
+        <CardDescription className="text-base text-gray-600 mt-1">
+          Real-time air quality monitoring across North America with hourly updates
+        </CardDescription>
+      </div>
+    </div>
+    
+    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+      {lastUpdated && (
+        <div className="flex items-center gap-2 text-sm text-gray-600 bg-white px-3 py-2 rounded-full border">
+          <Clock className="h-4 w-4" />
+          Last updated: {lastUpdated}
+        </div>
+      )}
+      <button 
+        onClick={fetchAirQualityData}
+        disabled={loading}
+        className="flex items-center gap-2 px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-md whitespace-nowrap"
+      >
+        <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+        {loading ? 'Refreshing...' : 'Refresh Data'}
+      </button>
+    </div>
+  </div>
+</CardHeader>
         <CardContent className="p-6">
           <div className="space-y-6">
+            {/* Map Style Selector */}
+            <div className="flex gap-2 justify-center">
+              <button
+                onClick={() => updateMapStyle("satellite")}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  mapStyle === "satellite" 
+                    ? "bg-blue-600 text-white shadow-md" 
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }`}
+              >
+                🛰️ Satellite View
+              </button>
+              <button
+                onClick={() => updateMapStyle("streets")}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  mapStyle === "streets" 
+                    ? "bg-blue-600 text-white shadow-md" 
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }`}
+              >
+                🗺️ Street View
+              </button>
+              <button
+                onClick={() => updateMapStyle("terrain")}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  mapStyle === "terrain" 
+                    ? "bg-blue-600 text-white shadow-md" 
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }`}
+              >
+                ⛰️ Terrain View
+              </button>
+            </div>
+
             {/* AQI Legend */}
             <div className="bg-gray-50 p-4 rounded-xl border">
               <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
@@ -384,19 +480,19 @@ export function AirQualityMap() {
               )}
             </div>
 
-           {/* Data Sources Info */}
-<div className="flex gap-2 justify-center flex-wrap">
-  <Badge variant="outline" className="flex items-center gap-1 border-blue-300 text-blue-700 bg-blue-50/50">
-    <Satellite className="h-3 w-3" />
-    Live Satellite Data
-  </Badge>
-  <Badge variant="outline" className="border-green-400 text-green-800 bg-green-50/70">PM2.5 Monitoring</Badge>
-  <Badge variant="outline" className="border-amber-500 text-amber-900 bg-amber-50/60">PM10 Particles</Badge>
-  <Badge variant="outline" className="border-rose-400 text-rose-800 bg-rose-50/70">NO₂ Levels</Badge>
-  <Badge variant="outline" className="border-violet-400 text-violet-800 bg-violet-50/70">O₃ Ozone</Badge>
-  <Badge variant="outline" className="border-orange-400 text-orange-800 bg-orange-50/70">SO₂ Detection</Badge>
-  <Badge variant="outline" className="border-cyan-400 text-cyan-800 bg-cyan-50/70">CO Carbon Monoxide</Badge>
-</div>
+            {/* Data Sources Info */}
+            <div className="flex gap-2 justify-center flex-wrap">
+              <Badge variant="outline" className="flex items-center gap-1 border-blue-300 text-blue-700 bg-blue-50/50">
+                <Satellite className="h-3 w-3" />
+                Live Satellite Data
+              </Badge>
+              <Badge variant="outline" className="border-green-400 text-green-800 bg-green-50/70">PM2.5 Monitoring</Badge>
+              <Badge variant="outline" className="border-amber-500 text-amber-900 bg-amber-50/60">PM10 Particles</Badge>
+              <Badge variant="outline" className="border-rose-400 text-rose-800 bg-rose-50/70">NO₂ Levels</Badge>
+              <Badge variant="outline" className="border-violet-400 text-violet-800 bg-violet-50/70">O₃ Ozone</Badge>
+              <Badge variant="outline" className="border-orange-400 text-orange-800 bg-orange-50/70">SO₂ Detection</Badge>
+              <Badge variant="outline" className="border-cyan-400 text-cyan-800 bg-cyan-50/70">CO Carbon Monoxide</Badge>
+            </div>
 
             {/* Stats Summary */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
