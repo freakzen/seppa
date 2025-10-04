@@ -326,7 +326,7 @@ export function AirQualityMap() {
               </div>
               Live Air Quality Map - North America
             </CardTitle>
-            <div className="flex items-center gap-5">
+            <div className="flex items-center gap-4">
               {lastUpdated && (
                 <div className="flex items-center gap-2 text-sm text-gray-600 bg-white px-3 py-1 rounded-full border">
                   <Clock className="h-4 w-4" />
@@ -384,19 +384,19 @@ export function AirQualityMap() {
               )}
             </div>
 
-            {/* Data Sources Info */}
-            <div className="flex gap-2 justify-center flex-wrap">
-              <Badge variant="outline" className="flex items-center gap-1 bg-blue-50">
-                <Satellite className="h-3 w-3" />
-                Live Satellite Data
-              </Badge>
-              <Badge variant="outline" className="bg-green-50">PM2.5 Monitoring</Badge>
-              <Badge variant="outline" className="bg-yellow-50">PM10 Particles</Badge>
-              <Badge variant="outline" className="bg-red-50">NO₂ Levels</Badge>
-              <Badge variant="outline" className="bg-purple-50">O₃ Ozone</Badge>
-              <Badge variant="outline" className="bg-orange-50">SO₂ Detection</Badge>
-              <Badge variant="outline" className="bg-cyan-50">CO Carbon Monoxide</Badge>
-            </div>
+           {/* Data Sources Info */}
+<div className="flex gap-2 justify-center flex-wrap">
+  <Badge variant="outline" className="flex items-center gap-1 border-blue-300 text-blue-700 bg-blue-50/50">
+    <Satellite className="h-3 w-3" />
+    Live Satellite Data
+  </Badge>
+  <Badge variant="outline" className="border-green-400 text-green-800 bg-green-50/70">PM2.5 Monitoring</Badge>
+  <Badge variant="outline" className="border-amber-500 text-amber-900 bg-amber-50/60">PM10 Particles</Badge>
+  <Badge variant="outline" className="border-rose-400 text-rose-800 bg-rose-50/70">NO₂ Levels</Badge>
+  <Badge variant="outline" className="border-violet-400 text-violet-800 bg-violet-50/70">O₃ Ozone</Badge>
+  <Badge variant="outline" className="border-orange-400 text-orange-800 bg-orange-50/70">SO₂ Detection</Badge>
+  <Badge variant="outline" className="border-cyan-400 text-cyan-800 bg-cyan-50/70">CO Carbon Monoxide</Badge>
+</div>
 
             {/* Stats Summary */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
