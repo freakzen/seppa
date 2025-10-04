@@ -231,8 +231,127 @@ export function AirQualityDashboard() {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
+      <style jsx global>{`
+        @keyframes fadeInUp {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        @keyframes slideInRight {
+          from {
+            opacity: 0;
+            transform: translateX(30px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
+
+        @keyframes pulse {
+          0%, 100% {
+            opacity: 1;
+          }
+          50% {
+            opacity: 0.7;
+          }
+        }
+
+        @keyframes scaleIn {
+          from {
+            opacity: 0;
+            transform: scale(0.9);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+
+        @keyframes shimmer {
+          0% {
+            background-position: -1000px 0;
+          }
+          100% {
+            background-position: 1000px 0;
+          }
+        }
+
+        .animate-fade-in-up {
+          animation: fadeInUp 0.6s ease-out forwards;
+        }
+
+        .animate-slide-in-right {
+          animation: slideInRight 0.5s ease-out forwards;
+        }
+
+        .animate-pulse-slow {
+          animation: pulse 2s ease-in-out infinite;
+        }
+
+        .animate-scale-in {
+          animation: scaleIn 0.4s ease-out forwards;
+        }
+
+        .stagger-1 {
+          animation-delay: 0.1s;
+          opacity: 0;
+        }
+
+        .stagger-2 {
+          animation-delay: 0.2s;
+          opacity: 0;
+        }
+
+        .stagger-3 {
+          animation-delay: 0.3s;
+          opacity: 0;
+        }
+
+        .stagger-4 {
+          animation-delay: 0.4s;
+          opacity: 0;
+        }
+
+        .stagger-5 {
+          animation-delay: 0.5s;
+          opacity: 0;
+        }
+
+        .stagger-6 {
+          animation-delay: 0.6s;
+          opacity: 0;
+        }
+
+        .hover-lift {
+          transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .hover-lift:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .shimmer {
+          background: linear-gradient(
+            90deg,
+            transparent,
+            rgba(255, 255, 255, 0.3),
+            transparent
+          );
+          background-size: 1000px 100%;
+          animation: shimmer 2s infinite;
+        }
+      `}</style>
+
       {/* Header with Search */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 animate-fade-in-up">
         <div>
           <h1 className="text-3xl font-bold text-balance">Team StrawHats </h1>
           <p className="text-muted-foreground text-pretty">
@@ -240,27 +359,27 @@ export function AirQualityDashboard() {
           </p>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 animate-slide-in-right">
           <form onSubmit={handleLocationSearch} className="flex gap-2">
             <Input
               placeholder="Search location..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-48"
+              className="w-48 transition-all duration-300 focus:w-64"
             />
-            <Button type="submit" size="icon" variant="outline">
+            <Button type="submit" size="icon" variant="outline" className="hover:scale-110 transition-transform duration-200">
               <Search className="h-4 w-4" />
             </Button>
           </form>
 
-          <Button onClick={handleRefresh} variant="outline" size="icon">
+          <Button onClick={handleRefresh} variant="outline" size="icon" className="hover:rotate-180 transition-transform duration-500">
             <RefreshCw className="h-4 w-4" />
           </Button>
 
           <div className="flex items-center gap-2">
             {dataSourceInfo && (
               <>
-                <dataSourceInfo.icon className={`h-5 w-5 ${dataSourceInfo.color}`} />
+                <dataSourceInfo.icon className={`h-5 w-5 ${dataSourceInfo.color} animate-pulse-slow`} />
                 <span className="text-sm font-medium">{dataSourceInfo.label}</span>
               </>
             )}
@@ -269,10 +388,10 @@ export function AirQualityDashboard() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="border-l-4 border-l-blue-500">
+        <Card className="border-l-4 border-l-blue-500 hover-lift animate-fade-in-up stagger-1">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <Database className="h-5 w-5 text-blue-600" />
+              <Database className="h-5 w-5 text-blue-600 animate-pulse-slow" />
               <div>
                 <p className="font-medium">EPA AirNow</p>
                 <p className="text-xs text-muted-foreground">
@@ -283,10 +402,10 @@ export function AirQualityDashboard() {
           </CardContent>
         </Card>
 
-        <Card className="border-l-4 border-l-purple-500">
+        <Card className="border-l-4 border-l-purple-500 hover-lift animate-fade-in-up stagger-2">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <Satellite className="h-5 w-5 text-purple-600" />
+              <Satellite className="h-5 w-5 text-purple-600 animate-pulse-slow" />
               <div>
                 <p className="font-medium">NASA TEMPO</p>
                 <p className="text-xs text-muted-foreground">
@@ -299,10 +418,10 @@ export function AirQualityDashboard() {
           </CardContent>
         </Card>
 
-        <Card className="border-l-4 border-l-orange-500">
+        <Card className="border-l-4 border-l-orange-500 hover-lift animate-fade-in-up stagger-3">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <Cloud className="h-5 w-5 text-orange-600" />
+              <Cloud className="h-5 w-5 text-orange-600 animate-pulse-slow" />
               <div>
                 <p className="font-medium">Weather Data</p>
                 <p className="text-xs text-muted-foreground">
@@ -318,8 +437,8 @@ export function AirQualityDashboard() {
 
       {/* Current Conditions Alert */}
       {currentData && aqiInfo && currentData.measurements.aqi > 100 && (
-        <Alert className="border-destructive">
-          <AlertTriangle className="h-4 w-4" />
+        <Alert className="border-destructive animate-scale-in">
+          <AlertTriangle className="h-4 w-4 animate-pulse" />
           <AlertTitle>Air Quality Alert</AlertTitle>
           <AlertDescription>
             Current AQI is {currentData.measurements.aqi} ({aqiInfo.level}). Consider limiting outdoor activities.
@@ -329,24 +448,24 @@ export function AirQualityDashboard() {
 
       {/* Main Dashboard */}
       <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-6">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="map">Live Map</TabsTrigger>
-          <TabsTrigger value="trends">Trends</TabsTrigger>
-          <TabsTrigger value="forecast">Forecast</TabsTrigger>
-          <TabsTrigger value="alerts">Health Alerts</TabsTrigger>
-          <TabsTrigger value="notifications">Notifications</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-6 animate-fade-in-up stagger-2">
+          <TabsTrigger value="overview" className="transition-all duration-200 hover:scale-105">Overview</TabsTrigger>
+          <TabsTrigger value="map" className="transition-all duration-200 hover:scale-105">Live Map</TabsTrigger>
+          <TabsTrigger value="trends" className="transition-all duration-200 hover:scale-105">Trends</TabsTrigger>
+          <TabsTrigger value="forecast" className="transition-all duration-200 hover:scale-105">Forecast</TabsTrigger>
+          <TabsTrigger value="alerts" className="transition-all duration-200 hover:scale-105">Health Alerts</TabsTrigger>
+          <TabsTrigger value="notifications" className="transition-all duration-200 hover:scale-105">Notifications</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
           {/* Current AQI Card - Enhanced */}
           {currentData && aqiInfo && dataSourceInfo && measurements && (
-            <Card className="col-span-full">
+            <Card className="col-span-full animate-fade-in-up stagger-3 hover-lift">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
                     <CardTitle className="flex items-center gap-2">
-                      <MapPin className="h-5 w-5" />
+                      <MapPin className="h-5 w-5 animate-pulse-slow" />
                       {currentData.location.name}
                     </CardTitle>
                     <CardDescription className="flex items-center gap-2">
@@ -355,12 +474,12 @@ export function AirQualityDashboard() {
                     </CardDescription>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Badge variant="secondary" className="text-xs flex items-center gap-1">
+                    <Badge variant="secondary" className="text-xs flex items-center gap-1 animate-slide-in-right">
                       <dataSourceInfo.icon className="h-3 w-3" />
                       {dataSourceInfo.label}
                     </Badge>
                     {!currentData.dataAvailable && (
-                      <Badge variant="outline" className="text-xs">
+                      <Badge variant="outline" className="text-xs animate-slide-in-right">
                         Demo Data
                       </Badge>
                     )}
@@ -368,13 +487,13 @@ export function AirQualityDashboard() {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className={`p-6 rounded-lg mb-6 ${aqiInfo.bgColor}`}>
+                <div className={`p-6 rounded-lg mb-6 ${aqiInfo.bgColor} animate-scale-in transition-all duration-300`}>
                   <div className="flex items-center gap-6">
                     <div className="text-center">
-                      <div className="text-5xl font-bold text-gray-900">{measurements.aqi.display}</div>
+                      <div className="text-5xl font-bold text-gray-900 animate-scale-in">{measurements.aqi.display}</div>
                       <div className={`text-lg font-medium ${aqiInfo.textColor}`}>{aqiInfo.level}</div>
                     </div>
-                    <div className={`w-6 h-20 rounded-full ${aqiInfo.color}`}></div>
+                    <div className={`w-6 h-20 rounded-full ${aqiInfo.color} animate-pulse-slow`}></div>
                     <div className="flex-1">
                       <h3 className="font-semibold mb-2 text-gray-900">Air Quality Index</h3>
                       <p className="text-sm text-muted-foreground mb-2">
@@ -396,7 +515,7 @@ export function AirQualityDashboard() {
 
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
                   {/* PM2.5 Card */}
-                  <div className="text-center p-4 bg-blue-50 border-2 border-blue-200 rounded-lg shadow-sm">
+                  <div className="text-center p-4 bg-blue-50 border-2 border-blue-200 rounded-lg shadow-sm hover-lift animate-fade-in-up stagger-1">
                     <div className="text-2xl font-bold text-blue-700">
                       {measurements.pm25.display}
                     </div>
@@ -405,7 +524,7 @@ export function AirQualityDashboard() {
                   </div>
                   
                   {/* PM10 Card */}
-                  <div className="text-center p-4 bg-green-50 border-2 border-green-200 rounded-lg shadow-sm">
+                  <div className="text-center p-4 bg-green-50 border-2 border-green-200 rounded-lg shadow-sm hover-lift animate-fade-in-up stagger-2">
                     <div className="text-2xl font-bold text-green-700">
                       {measurements.pm10.display}
                     </div>
@@ -414,7 +533,7 @@ export function AirQualityDashboard() {
                   </div>
                   
                   {/* NO₂ Card */}
-                  <div className="text-center p-4 bg-orange-50 border-2 border-orange-200 rounded-lg shadow-sm">
+                  <div className="text-center p-4 bg-orange-50 border-2 border-orange-200 rounded-lg shadow-sm hover-lift animate-fade-in-up stagger-3">
                     <div className="text-2xl font-bold text-orange-700">
                       {measurements.no2.display}
                     </div>
@@ -423,7 +542,7 @@ export function AirQualityDashboard() {
                   </div>
 
                   {/* O₃ Card */}
-                  <div className="text-center p-4 bg-purple-50 border-2 border-purple-200 rounded-lg shadow-sm">
+                  <div className="text-center p-4 bg-purple-50 border-2 border-purple-200 rounded-lg shadow-sm hover-lift animate-fade-in-up stagger-4">
                     <div className="text-2xl font-bold text-purple-700">
                       {measurements.o3.display}
                     </div>
@@ -432,7 +551,7 @@ export function AirQualityDashboard() {
                   </div>
 
                   {/* CO Card */}
-                  <div className="text-center p-4 bg-red-50 border-2 border-red-200 rounded-lg shadow-sm">
+                  <div className="text-center p-4 bg-red-50 border-2 border-red-200 rounded-lg shadow-sm hover-lift animate-fade-in-up stagger-5">
                     <div className="text-2xl font-bold text-red-700">
                       {measurements.co.display}
                     </div>
@@ -441,39 +560,39 @@ export function AirQualityDashboard() {
                   </div>
 
                   {/* Trend Card */}
-                  <div className="text-center p-4 bg-gray-50 border-2 border-gray-200 rounded-lg shadow-sm">
-                    <trendInfo.icon className={`h-8 w-8 mx-auto mb-2 ${trendInfo.color}`} />
+                  <div className="text-center p-4 bg-gray-50 border-2 border-gray-200 rounded-lg shadow-sm hover-lift animate-fade-in-up stagger-6">
+                    <trendInfo.icon className={`h-8 w-8 mx-auto mb-2 ${trendInfo.color} animate-pulse-slow`} />
                     <div className="text-sm font-medium text-gray-800">Trend</div>
                     <div className={`text-xs ${trendInfo.color}`}>{trendInfo.text}</div>
                   </div>
                 </div>
 
                 {tempoData && (
-                  <div className="mt-6 p-4 bg-muted rounded-lg">
+                  <div className="mt-6 p-4 bg-muted rounded-lg animate-fade-in-up stagger-4 hover-lift">
                     <h4 className="font-semibold mb-3 flex items-center gap-2">
-                      <Satellite className="h-4 w-4" />
+                      <Satellite className="h-4 w-4 animate-pulse-slow" />
                       NASA TEMPO Satellite Data
                     </h4>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                      <div>
+                      <div className="animate-fade-in-up stagger-1">
                         <span className="text-muted-foreground">NO₂ Column:</span>
                         <div className="font-medium">
                           {tempoData.measurements?.no2_column?.toFixed(2) || "N/A"} mol/cm²
                         </div>
                       </div>
-                      <div>
+                      <div className="animate-fade-in-up stagger-2">
                         <span className="text-muted-foreground">O₃ Column:</span>
                         <div className="font-medium">
                           {tempoData.measurements?.o3_column?.toFixed(2) || "N/A"} mol/cm²
                         </div>
                       </div>
-                      <div>
+                      <div className="animate-fade-in-up stagger-3">
                         <span className="text-muted-foreground">Cloud Fraction:</span>
                         <div className="font-medium">
                           {((tempoData.measurements?.cloud_fraction || 0) * 100).toFixed(0)}%
                         </div>
                       </div>
-                      <div>
+                      <div className="animate-fade-in-up stagger-4">
                         <span className="text-muted-foreground">Data Quality:</span>
                         <div className="font-medium capitalize">
                           {tempoData.quality_flags?.overall_quality || "Unknown"}
@@ -486,27 +605,39 @@ export function AirQualityDashboard() {
             </Card>
           )}
 
-          <PollutantChart data={currentData ? currentData.measurements : null} />
+          <div className="animate-fade-in-up stagger-5">
+            <PollutantChart data={currentData ? currentData.measurements : null} />
+          </div>
         </TabsContent>
 
         <TabsContent value="map">
-          <AirQualityMap />
+          <div className="animate-fade-in-up">
+            <AirQualityMap />
+          </div>
         </TabsContent>
 
         <TabsContent value="trends">
-          <HistoricalTrends />
+          <div className="animate-fade-in-up">
+            <HistoricalTrends />
+          </div>
         </TabsContent>
 
         <TabsContent value="forecast">
-          <ForecastChart coordinates={coordinates} />
+          <div className="animate-fade-in-up">
+            <ForecastChart coordinates={coordinates} />
+          </div>
         </TabsContent>
 
         <TabsContent value="alerts">
-          <HealthAlerts currentAqi={currentData?.measurements.aqi} />
+          <div className="animate-fade-in-up">
+            <HealthAlerts currentAqi={currentData?.measurements.aqi} />
+          </div>
         </TabsContent>
 
         <TabsContent value="notifications">
-          <NotificationCenter />
+          <div className="animate-fade-in-up">
+            <NotificationCenter />
+          </div>
         </TabsContent>
       </Tabs>
     </div>

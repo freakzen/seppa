@@ -239,7 +239,7 @@ export function AirQualityMap() {
           <div style="min-width: 240px; font-family: system-ui, sans-serif;">
             <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #e2e8f0;">
               <div style="width: 16px; height: 16px; border-radius: 50%; background-color: ${aqiColor};"></div>
-              <h3 style="margin: 0; color: #1a202c; font-size: 16px; font-weight: 600;">${station.city}, ${station.country}</h3>
+              <h3 style="margin: 0; color: #dbdfe6ff; font-size: 16px; font-weight: 600;">${station.city}, ${station.country}</h3>
             </div>
             
             <div style="background: linear-gradient(135deg, ${aqiColor}20, ${aqiColor}40); padding: 12px; border-radius: 8px; margin-bottom: 12px;">
@@ -248,8 +248,8 @@ export function AirQualityMap() {
             </div>
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 13px;">
-              <div style="background: #f7fafc; padding: 6px 8px; border-radius: 4px;">
-                <div style="color: #718096; font-size: 11px;">PM2.5</div>
+              <div style="background: #d7e1ecff; padding: 6px 8px; border-radius: 4px;">
+                <div style="color: #d9dfe7ff; font-size: 11px;">PM2.5</div>
                 <div style="font-weight: 600; color: #2d3748;">${station.pm25.toFixed(1)} µg/m³</div>
               </div>
               <div style="background: #f7fafc; padding: 6px 8px; border-radius: 4px;">
